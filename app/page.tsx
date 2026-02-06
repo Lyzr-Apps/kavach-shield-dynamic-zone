@@ -128,33 +128,63 @@ export default function Home() {
         addWarRoomLog('Manager', 'Intelligence matching complete')
         addWarRoomLog('Manager', 'Aggregating findings...')
 
-        const parsedVerdict = parseManagerResponse(result.response.result?.verdict || JSON.stringify(result.response.result))
+        // The Manager agent returns JSON directly in result
+        let parsedVerdict: ManagerVerdict | null = null
+
+        // Try multiple parsing strategies
+        if (result.response.result) {
+          // Strategy 1: result is already the verdict object
+          if (result.response.result.verdict && result.response.result.confidence_score !== undefined) {
+            parsedVerdict = result.response.result as ManagerVerdict
+          }
+          // Strategy 2: result has a nested verdict field
+          else if (result.response.result.verdict && typeof result.response.result.verdict === 'string') {
+            parsedVerdict = parseManagerResponse(result.response.result.verdict)
+          }
+          // Strategy 3: result.text or result.message contains JSON
+          else if (result.response.result.text || result.response.result.message) {
+            parsedVerdict = parseManagerResponse(result.response.result.text || result.response.result.message)
+          }
+          // Strategy 4: Parse the entire result as JSON string
+          else {
+            parsedVerdict = parseManagerResponse(JSON.stringify(result.response.result))
+          }
+        }
 
         if (parsedVerdict) {
           setVerdict(parsedVerdict)
 
           // Extract war room logs from response
-          if (parsedVerdict.war_room_log) {
-            parsedVerdict.war_room_log.forEach((log: string) => {
-              addWarRoomLog('Manager', log)
+          if (parsedVerdict.war_room_log && Array.isArray(parsedVerdict.war_room_log)) {
+            parsedVerdict.war_room_log.forEach((log: any) => {
+              const logMessage = typeof log === 'string' ? log : (log.message || JSON.stringify(log))
+              const logAgent = typeof log === 'object' && log.agent ? log.agent : 'Manager'
+              addWarRoomLog(logAgent as any, logMessage)
             })
           }
 
           addWarRoomLog('Response', `Final verdict: ${parsedVerdict.verdict} (${parsedVerdict.confidence_score ? parsedVerdict.confidence_score.toFixed(1) : '0'}% confidence)`)
 
-          // Generate action checklist
-          if (parsedVerdict.verdict === 'RED' || parsedVerdict.verdict === 'YELLOW') {
+          // Use response_data from Manager if available, otherwise call Response Agent
+          if (parsedVerdict.response_data && parsedVerdict.response_data.action_checklist) {
+            const responseData = parsedVerdict.response_data
+            setChecklist(responseData.action_checklist.map((item: string) => ({ text: item, checked: false })))
+            setVerdict({ ...parsedVerdict })
+            addWarRoomLog('Response', 'Action plan ready')
+          } else if (parsedVerdict.verdict === 'RED' || parsedVerdict.verdict === 'YELLOW') {
             addWarRoomLog('Response', 'Generating action checklist...')
 
-            // Call Response Agent for detailed actions
+            // Fallback: Call Response Agent for detailed actions
             const responseResult = await callAIAgent(
-              `Generate response for ${parsedVerdict.verdict} threat verdict with ${parsedVerdict.confidence_score}% confidence. Scam type: ${parsedVerdict.intelligence_matches.scam_type}. Include cybercrime report in 1930 format and action checklist.`,
+              `Generate response for ${parsedVerdict.verdict} threat verdict with ${parsedVerdict.confidence_score}% confidence. Scam type: ${parsedVerdict.intelligence_matches?.scam_type || 'Unknown'}. Include cybercrime report in 1930 format and action checklist.`,
               AGENT_IDS.response
             )
 
             if (responseResult.success && responseResult.response.result) {
               const responseData = responseResult.response.result as ResponseAgentOutput
-              setChecklist(responseData.action_checklist.map(item => ({ text: item, checked: false })))
+              if (responseData.action_checklist && Array.isArray(responseData.action_checklist)) {
+                setChecklist(responseData.action_checklist.map((item: string) => ({ text: item, checked: false })))
+              }
 
               // Store response data in verdict
               parsedVerdict.response_data = responseData
@@ -165,7 +195,12 @@ export default function Home() {
           } else {
             setChecklist([{ text: 'No immediate action required - message appears safe', checked: false }])
           }
+        } else {
+          addWarRoomLog('Manager', 'Error: Failed to parse agent response')
+          console.error('Raw response:', result)
         }
+      } else {
+        addWarRoomLog('Manager', `Error: ${result.error || 'API call failed'}`)
       }
     } catch (error) {
       addWarRoomLog('Manager', `Error: ${error instanceof Error ? error.message : 'Analysis failed'}`)

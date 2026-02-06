@@ -1,0 +1,74 @@
+{
+  "nodes": [
+    {
+      "id": "input_node",
+      "type": "Input",
+      "label": "User Submission",
+      "nodeCategory": "input"
+    },
+    {
+      "id": "manager_agent",
+      "type": "Agent",
+      "label": "Kavach Sentinel Manager",
+      "nodeCategory": "agent",
+      "agent_id": "6985a36976d4fd436bf4b7ce"
+    },
+    {
+      "id": "forensic_agent",
+      "type": "Agent",
+      "label": "Forensic Agent",
+      "nodeCategory": "agent",
+      "agent_id": "6985a31a5eb49186d63e5dd4"
+    },
+    {
+      "id": "intelligence_agent",
+      "type": "Agent",
+      "label": "Intelligence Agent",
+      "nodeCategory": "agent",
+      "agent_id": "6985a332e17e33c11eed1b4e"
+    },
+    {
+      "id": "response_agent",
+      "type": "Agent",
+      "label": "Response Agent",
+      "nodeCategory": "agent",
+      "agent_id": "6985a34df7f7d3ffa5d86661"
+    },
+    {
+      "id": "output_node",
+      "type": "Output",
+      "label": "Verdict & Report",
+      "nodeCategory": "end"
+    }
+  ],
+  "edges": [
+    {
+      "source": "input_node",
+      "target": "manager_agent"
+    },
+    {
+      "source": "manager_agent",
+      "target": "forensic_agent"
+    },
+    {
+      "source": "manager_agent",
+      "target": "intelligence_agent"
+    },
+    {
+      "source": "forensic_agent",
+      "target": "manager_agent"
+    },
+    {
+      "source": "intelligence_agent",
+      "target": "manager_agent"
+    },
+    {
+      "source": "manager_agent",
+      "target": "response_agent"
+    },
+    {
+      "source": "response_agent",
+      "target": "output_node"
+    }
+  ]
+}

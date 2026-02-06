@@ -1,0 +1,36 @@
+{
+  "agent_name": "Response Agent",
+  "agent_id": "6985a34df7f7d3ffa5d86661",
+  "test_message": "Generate response for RED threat verdict with 95% confidence. Scam type: Digital Arrest impersonation. User received call claiming to be from ED (Enforcement Directorate) demanding immediate payment. Include cybercrime report in 1930 format and urgent action checklist.",
+  "expected_purpose": "Generate threat-adaptive responses",
+  "timestamp": "2026-02-06T08:19:10.383669",
+  "is_valid_json": true,
+  "validation_errors": [],
+  "actual_response": {
+    "status": "success",
+    "result": {
+      "action_checklist": [
+        "Immediately freeze all bank and online payment accounts.",
+        "File a formal complaint with local law enforcement and the Cybercrime Cell.",
+        "Preserve all communication records related to the call, including call logs and any messages.",
+        "Ensure no payments or personal information are provided to the caller.",
+        "Contact your bank to notify them of potential fraudulent activity and to secure your accounts."
+      ],
+      "cybercrime_report": "Cybercrime Report - 1930 Format\n\nReport Number: [Auto-generated number]\nDate: [Current Date]\n\n1. Complainant Details:\n   - Name: [User's Name]\n   - Contact Information: [User's Contact Information]\n   - Address: [User's Address]\n\n2. Incident Details:\n   - Date and Time of Incident: [Date and time of call]\n   - Description: The complainant received a call from an individual impersonating an officer from the Enforcement Directorate, demanding an immediate payment under the pretense of avoiding arrest.\n   - Method of Communication: Phone call\n   - Phone Number Used by Fraudster: [Phone Number]\n\n3. Fraud Details:\n   - Type of Scam: Digital Arrest Impersonation\n   - Threat Level: RED (95% confidence)\n\n4. Evidence:\n   - Call logs (Annexure-A)\n   - Messages and any recorded conversation (if available)\n\n5. Action Taken:\n   - Accounts frozen\n   - Complaint filed with law enforcement\n   - Evidence preserved",
+      "guidance_script": null,
+      "evidence_collection_steps": [
+        "Take screenshots of call logs showing the fraudulent number.",
+        "Record any suspicious conversations, if legally permissible.",
+        "Save all suspicious emails or messages as evidence.",
+        "Note down the caller's details such as voice, tone, and any specific instructions given."
+      ],
+      "threat_level": "RED",
+      "reassurance_message": null
+    },
+    "metadata": {
+      "agent_name": "Response Agent",
+      "timestamp": "2023-11-28T20:39:09Z"
+    }
+  },
+  "raw_response": "{\n  \"status\": \"success\",\n  \"result\": {\n    \"action_checklist\": [\n      \"Immediately freeze all bank and online payment accounts.\",\n      \"File a formal complaint with local law enforcement and the Cybercrime Cell.\",\n      \"Preserve all communication records related to the call, including call logs and any messages.\",\n      \"Ensure no payments or personal information are provided to the caller.\",\n      \"Contact your bank to notify them of potential fraudulent activity and to secure your accounts.\"\n    ],\n    \"cybercrime_report\": \"Cybercrime Report - 1930 Format\\n\\nReport Number: [Auto-generated number]\\nDate: [Current Date]\\n\\n1. Complainant Details:\\n   - Name: [User's Name]\\n   - Contact Information: [User's Contact Information]\\n   - Address: [User's Address]\\n\\n2. Incident Details:\\n   - Date and Time of Incident: [Date and time of call]\\n   - Description: The complainant received a call from an individual impersonating an officer from the Enforcement Directorate, demanding an immediate payment under the pretense of avoiding arrest.\\n   - Method of Communication: Phone call\\n   - Phone Number Used by Fraudster: [Phone Number]\\n\\n3. Fraud Details:\\n   - Type of Scam: Digital Arrest Impersonation\\n   - Threat Level: RED (95% confidence)\\n\\n4. Evidence:\\n   - Call logs (Annexure-A)\\n   - Messages and any recorded conversation (if available)\\n\\n5. Action Taken:\\n   - Accounts frozen\\n   - Complaint filed with law enforcement\\n   - Evidence preserved\",\n    \"guidance_script\": null,\n    \"evidence_collection_steps\": [\n      \"Take screenshots of call logs showing the fraudulent number.\",\n      \"Record any suspicious conversations, if legally permissible.\",\n      \"Save all suspicious emails or messages as evidence.\",\n      \"Note down the caller's details such as voice, tone, and any specific instructions given.\"\n    ],\n    \"threat_level\": \"RED\",\n    \"reassurance_message\": null\n  },\n  \"metadata\": {\n    \"agent_name\": \"Response Agent\",\n    \"timestamp\": \"2023-11-28T20:39:09Z\"\n  }\n}"
+}

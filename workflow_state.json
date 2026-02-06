@@ -1,0 +1,54 @@
+{
+  "workflow_name": "Kavach Scam Detection System",
+  "creation_date": "2026-02-06",
+  "agents": {
+    "manager": {
+      "agent_id": "6985a36976d4fd436bf4b7ce",
+      "name": "Kavach Sentinel Manager",
+      "role": "Multi-Agent Scam Detection Orchestrator",
+      "type": "manager"
+    },
+    "sub_agents": [
+      {
+        "agent_id": "6985a31a5eb49186d63e5dd4",
+        "name": "Forensic Agent",
+        "role": "Digital Scam Red Flag Detector",
+        "type": "sub_agent"
+      },
+      {
+        "agent_id": "6985a332e17e33c11eed1b4e",
+        "name": "Intelligence Agent",
+        "role": "Scam Pattern Intelligence Analyst",
+        "type": "sub_agent",
+        "has_knowledge_base": true,
+        "rag_id": "6985a2fdde7de278e55d288f",
+        "rag_name": "kavachscampatternsdbc7bl"
+      },
+      {
+        "agent_id": "6985a34df7f7d3ffa5d86661",
+        "name": "Response Agent",
+        "role": "Threat-Adaptive Response Generator",
+        "type": "sub_agent"
+      }
+    ]
+  },
+  "knowledge_bases": [
+    {
+      "rag_id": "6985a2fdde7de278e55d288f",
+      "rag_name": "kavachscampatternsdbc7bl",
+      "name": "Kavach Scam Patterns DB",
+      "description": "Indian scam patterns, I4C suspect registry, legal templates, and UPI fraud indicators for Intelligence Agent analysis",
+      "linked_agent": "6985a332e17e33c11eed1b4e"
+    }
+  ],
+  "workflow_pattern": "Manager-Subagent with Hybrid Orchestration",
+  "execution_flow": [
+    "User Input → Kavach Sentinel Manager",
+    "Manager → Forensic Agent (parallel)",
+    "Manager → Intelligence Agent (parallel)",
+    "Forensic Agent → Manager (findings)",
+    "Intelligence Agent → Manager (findings)",
+    "Manager → Response Agent (aggregated verdict)",
+    "Response Agent → Output"
+  ]
+}

@@ -1,0 +1,74 @@
+{
+  "agent_name": "Intelligence Agent",
+  "agent_id": "6985a332e17e33c11eed1b4e",
+  "agent_purpose": "pattern_intelligence",
+  "description": "Cross-references content against known scam patterns database to identify scam types and calculate pattern match confidence",
+  "response_schema": {
+    "status": "string",
+    "result": {
+      "matched_patterns": [
+        {
+          "pattern_name": "string",
+          "match_confidence": "number",
+          "source": "string"
+        }
+      ],
+      "scam_type": "string",
+      "overall_pattern_confidence": "number"
+    },
+    "metadata": {
+      "agent_name": "string",
+      "timestamp": "string"
+    }
+  },
+  "example_response": {
+    "status": "success",
+    "result": {
+      "matched_patterns": [
+        {
+          "pattern_name": "Phishing via fake KYC update",
+          "match_confidence": 95,
+          "source": "known_phishing_templates"
+        },
+        {
+          "pattern_name": "UPI fraud through fake payment request",
+          "match_confidence": 90,
+          "source": "upi_fraud_indicators"
+        }
+      ],
+      "scam_type": "Phishing",
+      "overall_pattern_confidence": 93
+    },
+    "metadata": {
+      "agent_name": "Intelligence Agent",
+      "timestamp": "2023-11-28T21:17:13Z"
+    }
+  },
+  "is_actual_tested": true,
+  "test_timestamp": "2026-02-06T08:18:54.028890",
+  "test_message_used": "Hello, provide a sample response",
+  "actual_test_response": {
+    "status": "success",
+    "result": {
+      "matched_patterns": [
+        {
+          "pattern_name": "Phishing via fake KYC update",
+          "match_confidence": 95,
+          "source": "known_phishing_templates"
+        },
+        {
+          "pattern_name": "UPI fraud through fake payment request",
+          "match_confidence": 90,
+          "source": "upi_fraud_indicators"
+        }
+      ],
+      "scam_type": "Phishing",
+      "overall_pattern_confidence": 93
+    },
+    "metadata": {
+      "agent_name": "Intelligence Agent",
+      "timestamp": "2023-11-28T21:17:13Z"
+    }
+  },
+  "test_passed": true
+}

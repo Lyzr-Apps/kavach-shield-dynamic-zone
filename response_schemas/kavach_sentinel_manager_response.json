@@ -1,0 +1,75 @@
+{
+  "agent_name": "Kavach Sentinel Manager",
+  "agent_id": "6985a36976d4fd436bf4b7ce",
+  "agent_purpose": "manager_orchestration",
+  "description": "Orchestrates parallel analysis by sub-agents, aggregates threat scores using weighted formula (Forensic 40%, Intelligence 60%), and produces final verdict with War Room logs",
+  "response_schema": {
+    "status": "string",
+    "result": {
+      "verdict": "string",
+      "confidence_score": "number",
+      "forensic_findings": {
+        "red_flags": [
+          "string"
+        ],
+        "total_severity_score": "number",
+        "forensic_confidence": "number"
+      },
+      "intelligence_matches": {
+        "matched_patterns": [
+          "string"
+        ],
+        "scam_type": "string",
+        "overall_pattern_confidence": "number"
+      },
+      "final_recommendation": "string",
+      "war_room_log": [
+        "string"
+      ]
+    },
+    "metadata": {
+      "agent_name": "string",
+      "timestamp": "string"
+    }
+  },
+  "example_response": {
+    "status": "success",
+    "result": {
+      "verdict": "YELLOW",
+      "confidence_score": 55,
+      "forensic_findings": {
+        "red_flags": [
+          "unusual link",
+          "request for personal information"
+        ],
+        "total_severity_score": 60,
+        "forensic_confidence": 70
+      },
+      "intelligence_matches": {
+        "matched_patterns": [
+          "phishing_stub",
+          "known_scam_signature"
+        ],
+        "scam_type": "Phishing",
+        "overall_pattern_confidence": 50
+      },
+      "final_recommendation": "Exercise caution before interacting further. Confirm legitimacy through official channels.",
+      "war_room_log": [
+        "Forensic Agent identified multiple red flags.",
+        "Intelligence Agent matched patterns with a known phishing scam.",
+        "Combined threat score suggests a medium risk level."
+      ]
+    },
+    "metadata": {
+      "agent_name": "Kavach Sentinel Manager",
+      "timestamp": "2023-10-01T12:00:00Z"
+    }
+  },
+  "is_actual_tested": true,
+  "test_timestamp": "2026-02-06T08:19:38.980785",
+  "test_message_used": "Hello, provide a sample response",
+  "actual_test_response": {
+    "raw_text": "The analysis of the suspicious message has been completed. Below are the aggregated findings from both the Forensic Agent and the Intelligence Agent:\n\n### Analysis Summary\n\n#### Forensic Findings:\n- **Red Flags Identified:**\n  1. Impersonation of Amazon customer service (Severity Score: 8)\n  2. Use of urgency language to provoke immediate response (Severity Score: 9)\n  3. Request for OTP sharing (Severity Score: 10)\n  4. Payment request to a suspicious UPI address (Severity Score: 9)\n- **Total Severity Score:** 36/40\n- **Forensic Confidence:** 95%\n\n#### Intelligence Pattern Matches:\n- **Matched Patterns:**\n  1. Phishing Template - Fake Customer Care Call with OTP Request (Match Confidence: 95)\n  2. UPI Fraud - Fake Payment Request (Match Confidence: 90)\n- **Scam Type:** Phishing\n- **Overall Pattern Confidence:** 95%\n\n### Combined Threat Assessment\n\nUsing the threat calculation formula:\n\\[ \\text{combined\\_threat\\_score} = (36 \\times 0.4) + (95 \\times 0.6) = 78.4 \\]\n\n#### Final Verdict:\n- **Threat Level:** RED - High risk, likely scam\n- **Confidence Score:** 78.4%\n\n### Final Recommendation:\nImmediate action is required. Do not engage with the message. Avoid sharing any personal information or making any payments as requested in the message. Report this incident to the relevant authorities and the official customer service of Amazon for further assistance.\n\n### War Room Log:\n\n- Received user input for analysis.\n- Triggered parallel analysis by Forensic and Intelligence Agents.\n- Forensic Agent identified high-severity red flags related to impersonation and suspicious financial requests.\n- Intelligence Agent matched patterns consistent with high-confidence phishing scams.\n- Aggregated findings suggest a RED threat level, requiring immediate user caution.\n- Triggered Response Agent with the final verdict.\n\n```json\n{\n  \"status\": \"success\",\n  \"result\": {\n    \"verdict\": \"RED\",\n    \"confidence_score\": 78.4,\n    \"forensic_findings\": {\n      \"red_flags\": [\n        {\n          \"description\": \"Impersonation of Amazon customer service.\",\n          \"severity\": \"HIGH\",\n          \"severity_score\": 8,\n          \"category\": \"impersonation\"\n        },\n        {\n          \"description\": \"Urgency language used to provoke immediate response.\",\n          \"severity\": \"HIGH\",\n          \"severity_score\": 9,\n          \"category\": \"urgency_language\"\n        },\n        {\n          \"description\": \"Request for OTP sharing which is a common fraud tactic.\",\n          \"severity\": \"HIGH\",\n          \"severity_score\": 10,\n          \"category\": \"suspicious_formatting\"\n        },\n        {\n          \"description\": \"Payment request to a suspicious UPI address.\",\n          \"severity\": \"HIGH\",\n          \"severity_score\": 9,\n          \"category\": \"suspicious_formatting\"\n        }\n      ],\n      \"total_severity_score\": 36,\n      \"forensic_confidence\": 95\n    },\n    \"intelligence_matches\": {\n      \"matched_patterns\": [\n        {\n          \"pattern_name\": \"Phishing Template - Fake Customer Care Call with OTP Request\",\n          \"match_confidence\": 95,\n          \"source\": \"known_phishing_templates\"\n        },\n        {\n          \"pattern_name\": \"UPI Fraud - Fake Payment Request\",\n          \"match_confidence\": 90,\n          \"source\": \"upi_fraud_indicators\"\n        }\n      ],\n      \"scam_type\": \"Phishing\",\n      \"overall_pattern_confidence\": 95\n    },\n    \"final_recommendation\": \"Immediate action is required. Do not engage with the message. Avoid sharing any personal information or making any payments as requested in the message. Report this incident to the relevant authorities and the official customer service of Amazon for further assistance.\",\n    \"war_room_log\": [\n      \"Received user input for analysis.\",\n      \"Triggered parallel analysis by Forensic and Intelligence Agents.\",\n      \"Forensic Agent identified high-severity red flags related to impersonation and suspicious financial requests.\",\n      \"Intelligence Agent matched patterns consistent with high-confidence phishing scams.\",\n      \"Aggregated findings suggest a RED threat level, requiring immediate user caution.\",\n      \"Triggered Response Agent with the final verdict.\"\n    ]\n  },\n  \"metadata\": {\n    \"agent_name\": \"Kavach Sentinel Manager\",\n    \"timestamp\": \"2023-11-30T16:48:29.000Z\"\n  }\n}\n```\n\nPlease take this threat seriously and take appropriate actions to protect yourself."
+  },
+  "test_passed": false
+}

@@ -1,0 +1,33 @@
+{
+  "agent_name": "Intelligence Agent",
+  "agent_id": "6985a332e17e33c11eed1b4e",
+  "test_message": "Message received: Your HDFC account will be blocked in 24 hours due to KYC expiry. Click this link to update: hdfc-kyc-update.site/verify or call our customer care at 9876543210. Send Rs 1 to verify.upi@oksbi to confirm your account is active.",
+  "expected_purpose": "Scam pattern matching with knowledge base",
+  "timestamp": "2026-02-06T08:18:54.028353",
+  "is_valid_json": true,
+  "validation_errors": [],
+  "actual_response": {
+    "status": "success",
+    "result": {
+      "matched_patterns": [
+        {
+          "pattern_name": "Phishing via fake KYC update",
+          "match_confidence": 95,
+          "source": "known_phishing_templates"
+        },
+        {
+          "pattern_name": "UPI fraud through fake payment request",
+          "match_confidence": 90,
+          "source": "upi_fraud_indicators"
+        }
+      ],
+      "scam_type": "Phishing",
+      "overall_pattern_confidence": 93
+    },
+    "metadata": {
+      "agent_name": "Intelligence Agent",
+      "timestamp": "2023-11-28T21:17:13Z"
+    }
+  },
+  "raw_response": "{\n  \"status\": \"success\",\n  \"result\": {\n    \"matched_patterns\": [\n      {\n        \"pattern_name\": \"Phishing via fake KYC update\",\n        \"match_confidence\": 95,\n        \"source\": \"known_phishing_templates\"\n      },\n      {\n        \"pattern_name\": \"UPI fraud through fake payment request\",\n        \"match_confidence\": 90,\n        \"source\": \"upi_fraud_indicators\"\n      }\n    ],\n    \"scam_type\": \"Phishing\",\n    \"overall_pattern_confidence\": 93\n  },\n  \"metadata\": {\n    \"agent_name\": \"Intelligence Agent\",\n    \"timestamp\": \"2023-11-28T21:17:13Z\"\n  }\n}"
+}

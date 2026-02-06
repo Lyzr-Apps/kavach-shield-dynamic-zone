@@ -1,0 +1,53 @@
+{
+  "agent_name": "Forensic Agent",
+  "agent_id": "6985a31a5eb49186d63e5dd4",
+  "test_message": "URGENT: This is CBI Officer Sharma. A parcel containing 200g of cocaine has been found in your name sent to Malaysia. Case has been registered under IPC Section 420 and 120B. You are under digital arrest. Transfer Rs 50,000 to UPI ID cbi.verify@paytm for case clearance within 2 hours or warrant will be issued.",
+  "expected_purpose": "Digital scam red flag detection",
+  "timestamp": "2026-02-06T08:18:39.176468",
+  "is_valid_json": true,
+  "validation_errors": [],
+  "actual_response": {
+    "status": "success",
+    "result": {
+      "red_flags": [
+        {
+          "description": "Fake government agency name used (CBI) for impersonation.",
+          "severity": "HIGH",
+          "severity_score": 10,
+          "category": "government_impersonation"
+        },
+        {
+          "description": "Use of urgency language indicating immediate action needed ('URGENT', 'Transfer within 2 hours').",
+          "severity": "HIGH",
+          "severity_score": 9,
+          "category": "urgency_language"
+        },
+        {
+          "description": "Legal error with reference to outdated IPC codes instead of BNS 2024.",
+          "severity": "HIGH",
+          "severity_score": 10,
+          "category": "legal_errors"
+        },
+        {
+          "description": "Impersonation using unverified payment request and unofficial formatting.",
+          "severity": "HIGH",
+          "severity_score": 10,
+          "category": "impersonation"
+        },
+        {
+          "description": "Suspicious formatting with threatening tone and poor grammar.",
+          "severity": "MEDIUM",
+          "severity_score": 6,
+          "category": "suspicious_formatting"
+        }
+      ],
+      "total_severity_score": 45,
+      "forensic_confidence": 90
+    },
+    "metadata": {
+      "agent_name": "Forensic Agent",
+      "timestamp": "2023-11-29T03:24:36Z"
+    }
+  },
+  "raw_response": "{\n  \"status\": \"success\",\n  \"result\": {\n    \"red_flags\": [\n      {\n        \"description\": \"Fake government agency name used (CBI) for impersonation.\",\n        \"severity\": \"HIGH\",\n        \"severity_score\": 10,\n        \"category\": \"government_impersonation\"\n      },\n      {\n        \"description\": \"Use of urgency language indicating immediate action needed ('URGENT', 'Transfer within 2 hours').\",\n        \"severity\": \"HIGH\",\n        \"severity_score\": 9,\n        \"category\": \"urgency_language\"\n      },\n      {\n        \"description\": \"Legal error with reference to outdated IPC codes instead of BNS 2024.\",\n        \"severity\": \"HIGH\",\n        \"severity_score\": 10,\n        \"category\": \"legal_errors\"\n      },\n      {\n        \"description\": \"Impersonation using unverified payment request and unofficial formatting.\",\n        \"severity\": \"HIGH\",\n        \"severity_score\": 10,\n        \"category\": \"impersonation\"\n      },\n      {\n        \"description\": \"Suspicious formatting with threatening tone and poor grammar.\",\n        \"severity\": \"MEDIUM\",\n        \"severity_score\": 6,\n        \"category\": \"suspicious_formatting\"\n      }\n    ],\n    \"total_severity_score\": 45,\n    \"forensic_confidence\": 90\n  },\n  \"metadata\": {\n    \"agent_name\": \"Forensic Agent\",\n    \"timestamp\": \"2023-11-29T03:24:36Z\"\n  }\n}"
+}

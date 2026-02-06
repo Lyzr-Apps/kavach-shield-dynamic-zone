@@ -1,0 +1,115 @@
+{
+  "agent_name": "Forensic Agent",
+  "agent_id": "6985a31a5eb49186d63e5dd4",
+  "agent_purpose": "forensic_analysis",
+  "description": "Detects scam red flags including government impersonation, urgency language, BNS 2024 legal errors, and suspicious formatting with severity scoring",
+  "response_schema": {
+    "status": "string",
+    "result": {
+      "red_flags": [
+        {
+          "description": "string",
+          "severity": "string",
+          "severity_score": "number",
+          "category": "string"
+        }
+      ],
+      "total_severity_score": "number",
+      "forensic_confidence": "number"
+    },
+    "metadata": {
+      "agent_name": "string",
+      "timestamp": "string"
+    }
+  },
+  "example_response": {
+    "status": "success",
+    "result": {
+      "red_flags": [
+        {
+          "description": "Fake government agency name used (CBI) for impersonation.",
+          "severity": "HIGH",
+          "severity_score": 10,
+          "category": "government_impersonation"
+        },
+        {
+          "description": "Use of urgency language indicating immediate action needed ('URGENT', 'Transfer within 2 hours').",
+          "severity": "HIGH",
+          "severity_score": 9,
+          "category": "urgency_language"
+        },
+        {
+          "description": "Legal error with reference to outdated IPC codes instead of BNS 2024.",
+          "severity": "HIGH",
+          "severity_score": 10,
+          "category": "legal_errors"
+        },
+        {
+          "description": "Impersonation using unverified payment request and unofficial formatting.",
+          "severity": "HIGH",
+          "severity_score": 10,
+          "category": "impersonation"
+        },
+        {
+          "description": "Suspicious formatting with threatening tone and poor grammar.",
+          "severity": "MEDIUM",
+          "severity_score": 6,
+          "category": "suspicious_formatting"
+        }
+      ],
+      "total_severity_score": 45,
+      "forensic_confidence": 90
+    },
+    "metadata": {
+      "agent_name": "Forensic Agent",
+      "timestamp": "2023-11-29T03:24:36Z"
+    }
+  },
+  "is_actual_tested": true,
+  "test_timestamp": "2026-02-06T08:18:39.177020",
+  "test_message_used": "Hello, provide a sample response",
+  "actual_test_response": {
+    "status": "success",
+    "result": {
+      "red_flags": [
+        {
+          "description": "Fake government agency name used (CBI) for impersonation.",
+          "severity": "HIGH",
+          "severity_score": 10,
+          "category": "government_impersonation"
+        },
+        {
+          "description": "Use of urgency language indicating immediate action needed ('URGENT', 'Transfer within 2 hours').",
+          "severity": "HIGH",
+          "severity_score": 9,
+          "category": "urgency_language"
+        },
+        {
+          "description": "Legal error with reference to outdated IPC codes instead of BNS 2024.",
+          "severity": "HIGH",
+          "severity_score": 10,
+          "category": "legal_errors"
+        },
+        {
+          "description": "Impersonation using unverified payment request and unofficial formatting.",
+          "severity": "HIGH",
+          "severity_score": 10,
+          "category": "impersonation"
+        },
+        {
+          "description": "Suspicious formatting with threatening tone and poor grammar.",
+          "severity": "MEDIUM",
+          "severity_score": 6,
+          "category": "suspicious_formatting"
+        }
+      ],
+      "total_severity_score": 45,
+      "forensic_confidence": 90
+    },
+    "metadata": {
+      "agent_name": "Forensic Agent",
+      "timestamp": "2023-11-29T03:24:36Z"
+    }
+  },
+  "test_passed": true
+}

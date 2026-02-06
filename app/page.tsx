@@ -564,25 +564,25 @@ export default function Home() {
                 {verdict.forensic_findings?.red_flags && verdict.forensic_findings.red_flags.length > 0 && (
                 <Card className="bg-gray-900/50 border-gray-800">
                   <CardHeader>
-                    <CardTitle className="text-white flex items-center gap-2">
-                      <FaExclamationTriangle className="text-red-500" />
+                    <CardTitle className="text-white flex items-center gap-3 text-xl">
+                      <FaExclamationTriangle className="text-red-500 text-2xl" />
                       Red Flags Detected ({verdict.forensic_findings.red_flags.length})
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-3">
                     {verdict.forensic_findings.red_flags.map((flag, idx) => (
-                      <div key={idx} className="p-4 bg-gray-800 rounded-lg border-l-4 border-red-500">
-                        <div className="flex items-start justify-between mb-2">
-                          <p className="text-white flex-1">{flag.description}</p>
-                          <span className={`px-3 py-1 rounded-full text-xs font-bold ml-4 ${
-                            flag.severity === 'HIGH' ? 'bg-red-600 text-white' :
-                            flag.severity === 'MEDIUM' ? 'bg-amber-600 text-white' :
-                            'bg-yellow-600 text-black'
-                          }`}>
+                      <div key={idx} className="p-4 bg-gray-800/50 rounded-lg border-l-4 border-red-500 hover:bg-gray-800 transition-colors">
+                        <div className="flex items-start justify-between gap-4 mb-2">
+                          <p className="text-gray-200 flex-1 leading-relaxed">{flag.description}</p>
+                          <button className={`px-4 py-1.5 rounded-full text-sm font-semibold whitespace-nowrap ${
+                            flag.severity === 'HIGH' ? 'bg-red-600 text-white hover:bg-red-700' :
+                            flag.severity === 'MEDIUM' ? 'bg-amber-500 text-white hover:bg-amber-600' :
+                            'bg-yellow-500 text-gray-900 hover:bg-yellow-600'
+                          } transition-colors`}>
                             {flag.severity}
-                          </span>
+                          </button>
                         </div>
-                        <p className="text-gray-500 text-sm">Category: {flag.category}</p>
+                        <p className="text-gray-500 text-sm mt-2">Category: {flag.category}</p>
                       </div>
                     ))}
                   </CardContent>
@@ -593,26 +593,31 @@ export default function Home() {
                 {verdict.intelligence_matches?.matched_patterns && verdict.intelligence_matches.matched_patterns.length > 0 && (
                 <Card className="bg-gray-900/50 border-gray-800">
                   <CardHeader>
-                    <CardTitle className="text-white flex items-center gap-2">
-                      <MdSecurity className="text-purple-500" />
+                    <CardTitle className="text-white flex items-center gap-3 text-xl">
+                      <MdSecurity className="text-purple-500 text-2xl" />
                       Pattern Matches ({verdict.intelligence_matches.matched_patterns.length})
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-3">
                     {verdict.intelligence_matches.scam_type && (
-                    <div className="mb-4 p-3 bg-purple-900/30 rounded-lg border border-purple-700">
-                      <p className="text-purple-300 font-semibold">Scam Type: {verdict.intelligence_matches.scam_type}</p>
+                    <div className="mb-4 p-4 bg-purple-900/30 rounded-lg border border-purple-600/50">
+                      <p className="text-purple-200 font-semibold text-base">Scam Type: {verdict.intelligence_matches.scam_type}</p>
                     </div>
                     )}
                     {verdict.intelligence_matches.matched_patterns.map((pattern, idx) => (
-                      <div key={idx} className="p-4 bg-gray-800 rounded-lg border-l-4 border-purple-500">
-                        <div className="flex items-start justify-between mb-2">
-                          <p className="text-white flex-1">{pattern.pattern_name}</p>
-                          <span className="px-3 py-1 rounded-full text-xs font-bold bg-purple-600 text-white ml-4">
+                      <div key={idx} className="p-4 bg-gray-800/50 rounded-lg border-l-4 border-purple-500 hover:bg-gray-800 transition-colors">
+                        <div className="flex items-start justify-between gap-4 mb-2">
+                          <p className="text-gray-200 flex-1 leading-relaxed">{pattern.pattern_name}</p>
+                          <button className="px-4 py-1.5 rounded-full text-sm font-semibold bg-purple-600 text-white hover:bg-purple-700 transition-colors whitespace-nowrap">
                             {pattern.match_confidence}%
-                          </span>
+                          </button>
                         </div>
-                        <p className="text-gray-500 text-sm">Source: {pattern.source}</p>
+                        {pattern.source && (
+                          <p className="text-gray-500 text-sm mt-2">Source: {pattern.source}</p>
+                        )}
+                        {pattern.evidence && (
+                          <p className="text-gray-400 text-sm mt-1 italic">{pattern.evidence}</p>
+                        )}
                       </div>
                     ))}
                   </CardContent>

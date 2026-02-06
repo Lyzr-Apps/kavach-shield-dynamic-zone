@@ -140,7 +140,7 @@ export default function Home() {
             })
           }
 
-          addWarRoomLog('Response', `Final verdict: ${parsedVerdict.verdict} (${parsedVerdict.confidence_score.toFixed(1)}% confidence)`)
+          addWarRoomLog('Response', `Final verdict: ${parsedVerdict.verdict} (${parsedVerdict.confidence_score ? parsedVerdict.confidence_score.toFixed(1) : '0'}% confidence)`)
 
           // Generate action checklist
           if (parsedVerdict.verdict === 'RED' || parsedVerdict.verdict === 'YELLOW') {
@@ -498,7 +498,7 @@ export default function Home() {
                   <div className="max-w-2xl mx-auto mb-6">
                     <div className="flex items-center justify-between mb-2">
                       <span className="text-gray-400">Confidence Score</span>
-                      <span className="text-white font-bold text-2xl">{verdict.confidence_score.toFixed(1)}%</span>
+                      <span className="text-white font-bold text-2xl">{verdict.confidence_score ? verdict.confidence_score.toFixed(1) : '0'}%</span>
                     </div>
                     <div className="h-6 bg-gray-800 rounded-full overflow-hidden">
                       <div
@@ -508,22 +508,25 @@ export default function Home() {
                           'bg-red-500'
                         }`}
                         style={{
-                          width: `${verdict.confidence_score}%`,
+                          width: `${verdict.confidence_score || 0}%`,
                           animation: 'fillMeter 1.5s ease-out'
                         }}
                       />
                     </div>
                   </div>
 
+                  {verdict.final_recommendation && (
                   <p className="text-gray-300 text-lg max-w-3xl mx-auto">
                     {verdict.final_recommendation}
                   </p>
+                  )}
                 </CardContent>
               </Card>
 
               {/* Analysis Results */}
               <div className="space-y-4">
                 {/* Red Flags */}
+                {verdict.forensic_findings?.red_flags && verdict.forensic_findings.red_flags.length > 0 && (
                 <Card className="bg-gray-900/50 border-gray-800">
                   <CardHeader>
                     <CardTitle className="text-white flex items-center gap-2">
@@ -549,8 +552,10 @@ export default function Home() {
                     ))}
                   </CardContent>
                 </Card>
+                )}
 
                 {/* Pattern Matches */}
+                {verdict.intelligence_matches?.matched_patterns && verdict.intelligence_matches.matched_patterns.length > 0 && (
                 <Card className="bg-gray-900/50 border-gray-800">
                   <CardHeader>
                     <CardTitle className="text-white flex items-center gap-2">
@@ -559,9 +564,11 @@ export default function Home() {
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-3">
+                    {verdict.intelligence_matches.scam_type && (
                     <div className="mb-4 p-3 bg-purple-900/30 rounded-lg border border-purple-700">
                       <p className="text-purple-300 font-semibold">Scam Type: {verdict.intelligence_matches.scam_type}</p>
                     </div>
+                    )}
                     {verdict.intelligence_matches.matched_patterns.map((pattern, idx) => (
                       <div key={idx} className="p-4 bg-gray-800 rounded-lg border-l-4 border-purple-500">
                         <div className="flex items-start justify-between mb-2">
@@ -575,6 +582,7 @@ export default function Home() {
                     ))}
                   </CardContent>
                 </Card>
+                )}
 
                 {/* Action Checklist */}
                 <Card className="bg-gray-900/50 border-gray-800">
@@ -716,10 +724,10 @@ export default function Home() {
                           verdict.verdict === 'YELLOW' ? 'bg-amber-500' :
                           'bg-red-500'
                         }`}
-                        style={{ width: `${verdict.confidence_score}%` }}
+                        style={{ width: `${verdict.confidence_score || 0}%` }}
                       />
                     </div>
-                    <span className="text-white font-bold">{verdict.confidence_score.toFixed(0)}%</span>
+                    <span className="text-white font-bold">{verdict.confidence_score ? verdict.confidence_score.toFixed(0) : '0'}%</span>
                   </div>
                 </div>
               )}

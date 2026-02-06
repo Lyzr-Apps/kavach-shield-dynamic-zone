@@ -29,6 +29,9 @@ export default function Home() {
   const [panicModeInput, setPanicModeInput] = useState('')
   const [panicThreats, setPanicThreats] = useState<string[]>([])
   const [showReport, setShowReport] = useState(false)
+  const [showCopyModal, setShowCopyModal] = useState(false)
+  const [copyModalText, setCopyModalText] = useState('')
+  const [panicResponse, setPanicResponse] = useState<{ stalling_script: string[]; safety_tip: string } | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const logEndRef = useRef<HTMLDivElement>(null)
 
@@ -152,6 +155,29 @@ export default function Home() {
         }
 
         if (parsedVerdict) {
+          // HIGH-THREAT OVERRIDE: BNS 2024 Critical Patterns
+          const inputText = (pastedText || '').toLowerCase()
+          const hasCriticalThreat =
+            inputText.includes('ipc 420') ||
+            inputText.includes('digital arrest') ||
+            inputText.includes('cyber arrest') ||
+            (parsedVerdict.forensic_findings?.red_flags?.some(flag =>
+              flag.description.toLowerCase().includes('ipc 420') ||
+              flag.description.toLowerCase().includes('digital arrest') ||
+              flag.description.toLowerCase().includes('cyber arrest')
+            )) ||
+            (parsedVerdict.intelligence_matches?.matched_patterns?.some(pattern =>
+              pattern.pattern_name.toLowerCase().includes('ipc 420') ||
+              pattern.pattern_name.toLowerCase().includes('digital arrest') ||
+              pattern.pattern_name.toLowerCase().includes('cyber arrest')
+            ))
+
+          if (hasCriticalThreat) {
+            parsedVerdict.verdict = 'RED'
+            parsedVerdict.confidence_score = 98
+            addWarRoomLog('Manager', 'CRITICAL THREAT DETECTED: IPC 420/Digital Arrest pattern - overriding to RED at 98% confidence')
+          }
+
           setVerdict(parsedVerdict)
 
           // Extract war room logs from response
@@ -163,7 +189,7 @@ export default function Home() {
             })
           }
 
-          addWarRoomLog('Response', `Final verdict: ${parsedVerdict.verdict} (${parsedVerdict.confidence_score ? parsedVerdict.confidence_score.toFixed(1) : '0'}% confidence)`)
+          addWarRoomLog('Response', `Final verdict: ${parsedVerdict.verdict} (${Math.round(parsedVerdict.confidence_score || 0)}% confidence)`)
 
           // Use response_data from Manager if available, otherwise call Response Agent
           if (parsedVerdict.response_data && parsedVerdict.response_data.action_checklist) {
@@ -246,6 +272,40 @@ export default function Home() {
     }
   }, [panicModeInput])
 
+  // Real-time polling for panic response updates
+  useEffect(() => {
+    if (!panicMode || !panicModeInput.trim()) return
+
+    const fetchPanicResponse = async () => {
+      try {
+        const result = await callAIAgent(
+          `Generate real-time coaching for caller saying: "${panicModeInput}". Provide stalling_script array and safety_tip.`,
+          AGENT_IDS.response
+        )
+
+        if (result.success && result.response.result) {
+          const responseData = result.response.result
+          if (responseData.stalling_script && responseData.safety_tip) {
+            setPanicResponse({
+              stalling_script: responseData.stalling_script,
+              safety_tip: responseData.safety_tip,
+            })
+          }
+        }
+      } catch (error) {
+        console.error('Panic response polling error:', error)
+      }
+    }
+
+    // Initial fetch
+    fetchPanicResponse()
+
+    // Poll every 2.5 seconds
+    const intervalId = setInterval(fetchPanicResponse, 2500)
+
+    return () => clearInterval(intervalId)
+  }, [panicMode, panicModeInput])
+
   const downloadReport = () => {
     if (!verdict?.response_data?.cybercrime_report) return
 
@@ -258,9 +318,25 @@ export default function Home() {
     URL.revokeObjectURL(url)
   }
 
-  const copyReport = () => {
+  const copyReport = async () => {
     if (!verdict?.response_data?.cybercrime_report) return
-    navigator.clipboard.writeText(verdict.response_data.cybercrime_report)
+
+    try {
+      await navigator.clipboard.writeText(verdict.response_data.cybercrime_report)
+      addWarRoomLog('Manager', 'Report copied to clipboard successfully')
+    } catch (error) {
+      // Fallback: Show in modal if clipboard API fails (permissions/security policy)
+      if (error instanceof Error && error.name === 'NotAllowedError') {
+        setCopyModalText(verdict.response_data.cybercrime_report)
+        setShowCopyModal(true)
+        addWarRoomLog('Manager', 'Clipboard access denied - showing report in modal')
+      } else {
+        // Generic fallback for any other error
+        setCopyModalText(verdict.response_data.cybercrime_report)
+        setShowCopyModal(true)
+        addWarRoomLog('Manager', 'Copy failed - showing report in modal')
+      }
+    }
   }
 
   if (panicMode) {
@@ -324,19 +400,34 @@ export default function Home() {
               <CardTitle className="text-white text-xl">Safe Responses (Read These Aloud)</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              {[
+              {(panicResponse?.stalling_script || [
                 "I need to verify this with my bank manager first before taking any action.",
                 "Let me call the official helpline number to confirm this is legitimate.",
                 "I will visit the branch in person tomorrow to handle this.",
                 "I'm not comfortable sharing any information over the phone. Please send official documentation.",
                 "I need to consult with my family/lawyer before proceeding.",
-              ].map((script, idx) => (
+              ]).map((script, idx) => (
                 <div key={idx} className="p-4 bg-white/10 rounded-lg border border-green-500">
                   <p className="text-white text-lg font-medium">{script}</p>
                 </div>
               ))}
             </CardContent>
           </Card>
+
+          {/* Safety Tip */}
+          {panicResponse?.safety_tip && (
+            <Card className="bg-blue-800/50 border-blue-600">
+              <CardHeader>
+                <CardTitle className="text-white text-xl flex items-center gap-2">
+                  <MdSecurity className="text-2xl" />
+                  Safety Tip
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-blue-100 text-lg font-medium">{panicResponse.safety_tip}</p>
+              </CardContent>
+            </Card>
+          )}
 
           {/* Evidence Collection */}
           <Card className="bg-yellow-800/50 border-yellow-600">
@@ -533,7 +624,7 @@ export default function Home() {
                   <div className="max-w-2xl mx-auto mb-6">
                     <div className="flex items-center justify-between mb-2">
                       <span className="text-gray-400">Confidence Score</span>
-                      <span className="text-white font-bold text-2xl">{verdict.confidence_score ? verdict.confidence_score.toFixed(1) : '0'}%</span>
+                      <span className="text-white font-bold text-2xl">{Math.round(verdict.confidence_score || 0)}%</span>
                     </div>
                     <div className="h-6 bg-gray-800 rounded-full overflow-hidden">
                       <div
@@ -543,7 +634,7 @@ export default function Home() {
                           'bg-red-500'
                         }`}
                         style={{
-                          width: `${verdict.confidence_score || 0}%`,
+                          width: `${Math.round(verdict.confidence_score || 0)}%`,
                           animation: 'fillMeter 1.5s ease-out'
                         }}
                       />
@@ -555,47 +646,65 @@ export default function Home() {
                     {verdict.final_recommendation}
                   </p>
                   )}
+
+                  <p className="text-gray-500 text-sm mt-2">
+                    Total Confidence Score: {Math.round(verdict.confidence_score || 0)}%
+                  </p>
                 </CardContent>
               </Card>
 
               {/* Analysis Results */}
               <div className="space-y-4">
                 {/* Red Flags */}
-                {verdict.forensic_findings?.red_flags && verdict.forensic_findings.red_flags.length > 0 && (
+                {verdict.forensic_findings && (verdict.forensic_findings.red_flags?.length > 0 || (verdict.verdict !== 'GREEN' && verdict.forensic_findings.forensic_confidence > 0)) && (
                 <Card className="bg-gray-900/50 border-gray-800">
                   <CardHeader>
                     <CardTitle className="text-white flex items-center gap-3 text-xl">
                       <FaExclamationTriangle className="text-red-500 text-2xl" />
-                      Red Flags Detected ({verdict.forensic_findings.red_flags.length})
+                      Red Flags Detected ({verdict.forensic_findings.red_flags?.length || 0})
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-3">
-                    {verdict.forensic_findings.red_flags.map((flag, idx) => (
-                      <div key={idx} className="p-4 bg-gray-800/50 rounded-lg border-l-4 border-red-500 hover:bg-gray-800 transition-colors">
+                    {verdict.forensic_findings.red_flags && verdict.forensic_findings.red_flags.length > 0 ? (
+                      verdict.forensic_findings.red_flags.map((flag, idx) => (
+                        <div key={idx} className="p-4 bg-gray-800/50 rounded-lg border-l-4 border-red-500 hover:bg-gray-800 transition-colors">
+                          <div className="flex items-start justify-between gap-4 mb-2">
+                            <p className="text-gray-200 flex-1 leading-relaxed">{flag.description}</p>
+                            <button className={`px-4 py-1.5 rounded-full text-sm font-semibold whitespace-nowrap ${
+                              flag.severity === 'HIGH' ? 'bg-red-600 text-white hover:bg-red-700' :
+                              flag.severity === 'MEDIUM' ? 'bg-amber-500 text-white hover:bg-amber-600' :
+                              'bg-yellow-500 text-gray-900 hover:bg-yellow-600'
+                            } transition-colors`}>
+                              {flag.severity}
+                            </button>
+                          </div>
+                          <p className="text-gray-500 text-sm mt-2">Category: {flag.category}</p>
+                        </div>
+                      ))
+                    ) : (
+                      <div className="p-4 bg-gray-800/50 rounded-lg border-l-4 border-red-500">
                         <div className="flex items-start justify-between gap-4 mb-2">
-                          <p className="text-gray-200 flex-1 leading-relaxed">{flag.description}</p>
-                          <button className={`px-4 py-1.5 rounded-full text-sm font-semibold whitespace-nowrap ${
-                            flag.severity === 'HIGH' ? 'bg-red-600 text-white hover:bg-red-700' :
-                            flag.severity === 'MEDIUM' ? 'bg-amber-500 text-white hover:bg-amber-600' :
-                            'bg-yellow-500 text-gray-900 hover:bg-yellow-600'
-                          } transition-colors`}>
-                            {flag.severity}
+                          <p className="text-gray-200 flex-1 leading-relaxed">
+                            {verdict.final_recommendation || 'Forensic analysis detected suspicious patterns requiring investigation.'}
+                          </p>
+                          <button className="px-4 py-1.5 rounded-full text-sm font-semibold whitespace-nowrap bg-amber-500 text-white hover:bg-amber-600 transition-colors">
+                            MEDIUM
                           </button>
                         </div>
-                        <p className="text-gray-500 text-sm mt-2">Category: {flag.category}</p>
+                        <p className="text-gray-500 text-sm mt-2">Category: General Forensic Finding</p>
                       </div>
-                    ))}
+                    )}
                   </CardContent>
                 </Card>
                 )}
 
                 {/* Pattern Matches */}
-                {verdict.intelligence_matches?.matched_patterns && verdict.intelligence_matches.matched_patterns.length > 0 && (
+                {verdict.intelligence_matches && (verdict.intelligence_matches.matched_patterns?.length > 0 || (verdict.verdict !== 'GREEN' && verdict.intelligence_matches.overall_pattern_confidence > 0)) && (
                 <Card className="bg-gray-900/50 border-gray-800">
                   <CardHeader>
                     <CardTitle className="text-white flex items-center gap-3 text-xl">
                       <MdSecurity className="text-purple-500 text-2xl" />
-                      Pattern Matches ({verdict.intelligence_matches.matched_patterns.length})
+                      Pattern Matches ({verdict.intelligence_matches.matched_patterns?.length || 0})
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-3">
@@ -604,22 +713,38 @@ export default function Home() {
                       <p className="text-purple-200 font-semibold text-base">Scam Type: {verdict.intelligence_matches.scam_type}</p>
                     </div>
                     )}
-                    {verdict.intelligence_matches.matched_patterns.map((pattern, idx) => (
-                      <div key={idx} className="p-4 bg-gray-800/50 rounded-lg border-l-4 border-purple-500 hover:bg-gray-800 transition-colors">
+                    {verdict.intelligence_matches.matched_patterns && verdict.intelligence_matches.matched_patterns.length > 0 ? (
+                      verdict.intelligence_matches.matched_patterns.map((pattern, idx) => (
+                        <div key={idx} className="p-4 bg-gray-800/50 rounded-lg border-l-4 border-purple-500 hover:bg-gray-800 transition-colors">
+                          <div className="flex items-start justify-between gap-4 mb-2">
+                            <p className="text-gray-200 flex-1 leading-relaxed">{pattern.pattern_name}</p>
+                            <button className="px-4 py-1.5 rounded-full text-sm font-semibold bg-purple-600 text-white hover:bg-purple-700 transition-colors whitespace-nowrap">
+                              {pattern.match_confidence}%
+                            </button>
+                          </div>
+                          {pattern.source && (
+                            <p className="text-gray-500 text-sm mt-2">Source: {pattern.source}</p>
+                          )}
+                          {pattern.evidence && (
+                            <p className="text-gray-400 text-sm mt-1 italic">{pattern.evidence}</p>
+                          )}
+                        </div>
+                      ))
+                    ) : (
+                      <div className="p-4 bg-gray-800/50 rounded-lg border-l-4 border-purple-500">
                         <div className="flex items-start justify-between gap-4 mb-2">
-                          <p className="text-gray-200 flex-1 leading-relaxed">{pattern.pattern_name}</p>
+                          <p className="text-gray-200 flex-1 leading-relaxed">
+                            {verdict.intelligence_matches.scam_type
+                              ? `Intelligence database matched this content to known ${verdict.intelligence_matches.scam_type} patterns.`
+                              : 'Intelligence analysis detected patterns matching known scam databases.'}
+                          </p>
                           <button className="px-4 py-1.5 rounded-full text-sm font-semibold bg-purple-600 text-white hover:bg-purple-700 transition-colors whitespace-nowrap">
-                            {pattern.match_confidence}%
+                            {Math.round(verdict.intelligence_matches.overall_pattern_confidence || 75)}%
                           </button>
                         </div>
-                        {pattern.source && (
-                          <p className="text-gray-500 text-sm mt-2">Source: {pattern.source}</p>
-                        )}
-                        {pattern.evidence && (
-                          <p className="text-gray-400 text-sm mt-1 italic">{pattern.evidence}</p>
-                        )}
+                        <p className="text-gray-500 text-sm mt-2">Source: Intelligence Database</p>
                       </div>
-                    ))}
+                    )}
                   </CardContent>
                 </Card>
                 )}
@@ -764,10 +889,10 @@ export default function Home() {
                           verdict.verdict === 'YELLOW' ? 'bg-amber-500' :
                           'bg-red-500'
                         }`}
-                        style={{ width: `${verdict.confidence_score || 0}%` }}
+                        style={{ width: `${Math.round(verdict.confidence_score || 0)}%` }}
                       />
                     </div>
-                    <span className="text-white font-bold">{verdict.confidence_score ? verdict.confidence_score.toFixed(0) : '0'}%</span>
+                    <span className="text-white font-bold">{Math.round(verdict.confidence_score || 0)}%</span>
                   </div>
                 </div>
               )}

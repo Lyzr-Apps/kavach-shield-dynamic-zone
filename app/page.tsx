@@ -155,21 +155,69 @@ export default function Home() {
         }
 
         if (parsedVerdict) {
-          // HIGH-THREAT OVERRIDE: BNS 2024 Critical Patterns
-          const inputText = (pastedText || '').toLowerCase()
+          // DEFENSIVE VALIDATION: Initialize safe defaults for missing sub-agent data
+          if (!parsedVerdict.forensic_findings) {
+            parsedVerdict.forensic_findings = {
+              red_flags: [],
+              total_severity_score: 0,
+              forensic_confidence: 0
+            }
+          } else {
+            // Ensure nested arrays exist
+            if (!parsedVerdict.forensic_findings.red_flags) {
+              parsedVerdict.forensic_findings.red_flags = []
+            }
+            if (typeof parsedVerdict.forensic_findings.total_severity_score !== 'number') {
+              parsedVerdict.forensic_findings.total_severity_score = 0
+            }
+            if (typeof parsedVerdict.forensic_findings.forensic_confidence !== 'number') {
+              parsedVerdict.forensic_findings.forensic_confidence = 0
+            }
+          }
+
+          if (!parsedVerdict.intelligence_matches) {
+            parsedVerdict.intelligence_matches = {
+              matched_patterns: [],
+              scam_type: 'Unknown',
+              overall_pattern_confidence: 0
+            }
+          } else {
+            // Ensure nested arrays exist
+            if (!parsedVerdict.intelligence_matches.matched_patterns) {
+              parsedVerdict.intelligence_matches.matched_patterns = []
+            }
+            if (!parsedVerdict.intelligence_matches.scam_type) {
+              parsedVerdict.intelligence_matches.scam_type = 'Unknown'
+            }
+            if (typeof parsedVerdict.intelligence_matches.overall_pattern_confidence !== 'number') {
+              parsedVerdict.intelligence_matches.overall_pattern_confidence = 0
+            }
+          }
+
+          // SAFE NUMERIC CASTING: Ensure confidence_score is a valid number
+          parsedVerdict.confidence_score = Math.round(Number(parsedVerdict.confidence_score || 0))
+
+          // Ensure verdict is valid
+          if (!['GREEN', 'YELLOW', 'RED'].includes(parsedVerdict.verdict)) {
+            parsedVerdict.verdict = 'YELLOW'
+            addWarRoomLog('Manager', 'Invalid verdict received - defaulting to YELLOW')
+          }
+
+          // HIGH-THREAT OVERRIDE: BNS 2024 Critical Patterns with safe string handling
+          const inputText = String(pastedText || '').toLowerCase()
           const hasCriticalThreat =
             inputText.includes('ipc 420') ||
             inputText.includes('digital arrest') ||
             inputText.includes('cyber arrest') ||
             (parsedVerdict.forensic_findings?.red_flags?.some(flag =>
-              flag.description.toLowerCase().includes('ipc 420') ||
-              flag.description.toLowerCase().includes('digital arrest') ||
-              flag.description.toLowerCase().includes('cyber arrest')
+              String(flag.description || '').toLowerCase().includes('ipc 420') ||
+              String(flag.description || '').toLowerCase().includes('digital arrest') ||
+              String(flag.description || '').toLowerCase().includes('cyber arrest')
             )) ||
             (parsedVerdict.intelligence_matches?.matched_patterns?.some(pattern =>
-              pattern.pattern_name.toLowerCase().includes('ipc 420') ||
-              pattern.pattern_name.toLowerCase().includes('digital arrest') ||
-              pattern.pattern_name.toLowerCase().includes('cyber arrest')
+              String(pattern.pattern_name || '').toLowerCase().includes('ipc 420') ||
+              String(pattern.pattern_name || '').toLowerCase().includes('digital arrest') ||
+              String(pattern.pattern_name || '').toLowerCase().includes('cyber arrest')
             ))
 
           if (hasCriticalThreat) {
@@ -222,8 +270,35 @@ export default function Home() {
             setChecklist([{ text: 'No immediate action required - message appears safe', checked: false }])
           }
         } else {
-          addWarRoomLog('Manager', 'Error: Failed to parse agent response')
+          // FAIL-SAFE FALLBACK: Return stable fallback object if parsing fails
+          addWarRoomLog('Manager', 'Aggregation failed - returning fallback verdict')
           console.error('Raw response:', result)
+
+          const fallbackVerdict: ManagerVerdict = {
+            verdict: 'YELLOW',
+            confidence_score: 50,
+            forensic_findings: {
+              red_flags: [],
+              total_severity_score: 0,
+              forensic_confidence: 0
+            },
+            intelligence_matches: {
+              matched_patterns: [],
+              scam_type: 'Pending Validation',
+              overall_pattern_confidence: 0
+            },
+            final_recommendation: 'Analysis incomplete - please retry or contact support for manual review.',
+            war_room_log: ['Aggregation error occurred', 'Fallback verdict generated'],
+            response_data: undefined
+          }
+
+          setVerdict(fallbackVerdict)
+          setChecklist([
+            { text: 'Review the suspicious content manually', checked: false },
+            { text: 'Contact official support channels to verify legitimacy', checked: false },
+            { text: 'Do not share any personal information until verified', checked: false }
+          ])
+          addWarRoomLog('Manager', 'Fallback verdict: YELLOW (Pending Validation)')
         }
       } else {
         addWarRoomLog('Manager', `Error: ${result.error || 'API call failed'}`)
